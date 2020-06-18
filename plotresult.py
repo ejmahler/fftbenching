@@ -27,21 +27,21 @@ for y in ys:
 
 y_div12 = [y1/y2 for y1, y2 in zip(ys[0], ys[1])]
 
-fig1 = plt.figure(1)
+fig1 = plt.figure(1, figsize=(10,7))
 for y in ys: 
     plt.plot(x,y)
 plt.legend(fftnames)
 plt.xlabel("Length")
 plt.ylabel("Time, us")
 
-fig2 = plt.figure(2)
+fig2 = plt.figure(2, figsize=(10,7))
 for y in ys_norm: 
     plt.plot(x,y)
 plt.legend(fftnames)
 plt.xlabel("Length")
 plt.ylabel("Time/NlogN")
 
-fig3 = plt.figure(3) 
+fig3 = plt.figure(3, figsize=(10,7)) 
 plt.plot(x,y_div12)
 plt.grid(True)
 fig3.gca().yaxis.set_major_locator(ticker.MultipleLocator(1))
