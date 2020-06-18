@@ -44,8 +44,10 @@ plt.ylabel("Time/NlogN")
 fig3 = plt.figure(3) 
 plt.plot(x,y_div12)
 plt.grid(True)
-tick_spacing = 1
-fig3.gca().yaxis.set_major_locator(ticker.MultipleLocator(tick_spacing))
+fig3.gca().yaxis.set_major_locator(ticker.MultipleLocator(1))
+fig3.gca().xaxis.set_major_locator(ticker.MultipleLocator(32))
+plt.xlabel("Length")
+plt.ylabel("{}/{}".format(fftnames[0], fftnames[1]))
 
 
 plt.show()
