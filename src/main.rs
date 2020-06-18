@@ -5,6 +5,9 @@ use std::time::Instant;
 use fftw::array::AlignedVec;
 use fftw::plan::*;
 use fftw::types::*;
+use chfft::CFft1D;
+use num_complex;
+use num_traits;
 
 fn measure_rustfft(n:usize) -> f32 {
     let mut input:  Vec<Complex<f64>> = vec![Complex::zero(); n];
@@ -40,12 +43,28 @@ fn measure_fftw(n:usize) -> f32 {
     duration.as_micros() as f32 / reps as f32
 }
 
+fn measure_chfft(n:usize) -> f32 {
+    let input:  Vec<num_complex::Complex<f64>> = vec![num_complex::Complex::zero(); n];
+    let mut fft = CFft1D::<f64>::with_len(input.len());
+    let reps = 10000/n + 1;
+    for _r in 0..reps/4 {
+        let output = fft.forward(&input[..]);
+    }
+    let start = Instant::now();
+    for _r in 0..reps {
+        let output = fft.forward(&input[..]);
+    }
+    let duration = start.elapsed();
+    duration.as_micros() as f32 / reps as f32
+}
+
 fn main() {
     println!("N, RustFFT, FFTW");
     for n in 2..256 {
         let t_rustfft = measure_rustfft(n);
         let t_fftw = measure_fftw(n);
-        println!("{}, {}, {}", n, t_rustfft, t_fftw);
+        let t_chfft = measure_chfft(n);
+        println!("{}, {}, {}, {}", n, t_rustfft, t_fftw, t_chfft);
     }
 }
 

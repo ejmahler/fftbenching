@@ -9,3 +9,7 @@ edition = "2018"
 [dependencies]
 rustfft = "3.0.1"
 fftw = "0.6.0"
+chfft = "0.3.4"
+fourier = "0.1.0"
+num-complex = ">=0.3.0"
+num-traits = ">=0.0.0"
