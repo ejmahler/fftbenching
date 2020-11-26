@@ -7,9 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rustfft = "3.0.1"
+rustfft = { path = "../../rust/RustFFT" }
 fftw = "0.6.0"
 chfft = "0.3.4"
-fourier = "0.1.0"
+#fourier = { git = "https://github.com/HEnquist/fourier", branch = "num3" }
+fourier = { path = "../../rust/fourier/fourier" }
 num-complex = ">=0.3.0"
 num-traits = ">=0.0.0"

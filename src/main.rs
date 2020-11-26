@@ -9,8 +9,13 @@ use chfft::CFft1D;
 use num_complex;
 use num_traits;
 
+use fourier::create_fft_f64;
+use fourier::Fft;
+use fourier::Transform;
+
 fn measure_rustfft(n:usize) -> f32 {
     let mut input:  Vec<Complex<f64>> = vec![Complex::zero(); n];
+    input[0] = Complex::from(1.0);
     let mut output: Vec<Complex<f64>> = vec![Complex::zero(); n];
     let mut planner = FFTplanner::new(false);
     let fft = planner.plan_fft(n);
@@ -58,13 +63,32 @@ fn measure_chfft(n:usize) -> f32 {
     duration.as_micros() as f32 / reps as f32
 }
 
+
+fn measure_fourier(n:usize) -> f32 {
+    let mut input:  Vec<Complex<f64>> = vec![Complex::zero(); n];
+    input[0] = Complex::from(1.0);
+    let mut output: Vec<Complex<f64>> = vec![Complex::zero(); n];
+    let fft = create_fft_f64(n);
+    let reps = 10000/n + 1;
+    for _r in 0..reps/4 {
+        fft.transform(&input[..], &mut output[..], Transform::Fft);
+    }
+    let start = Instant::now();
+    for _r in 0..reps {
+        fft.transform(&input[..], &mut output[..], Transform::Fft);
+    }
+    let duration = start.elapsed();
+    duration.as_micros() as f32 / reps as f32
+}
+
 fn main() {
-    println!("N, RustFFT, FFTW");
+    println!("N, RustFFT, FFTW, chfft, fourier");
     for n in 2..256 {
         let t_rustfft = measure_rustfft(n);
         let t_fftw = measure_fftw(n);
         let t_chfft = measure_chfft(n);
-        println!("{}, {}, {}, {}", n, t_rustfft, t_fftw, t_chfft);
+        let t_fourier = measure_fourier(n);
+        println!("{}, {}, {}, {}, {}", n, t_rustfft, t_fftw, t_chfft, t_fourier);
     }
 }
 
