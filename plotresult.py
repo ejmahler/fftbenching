@@ -54,3 +54,7 @@ plt.ylabel("{}/{}".format(fftnames[0], fftnames[1]))
 
 plt.show()
 #print(data)
+
+for n, div in zip(x, y_div12):
+    if div <= 1:
+        print(int(n))

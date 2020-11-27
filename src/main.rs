@@ -8,7 +8,7 @@ use std::time::Instant;
 use num_complex;
 use num_traits;
 
-fn measure_bluestein(n: usize) -> f32 {
+fn measure_bluestein(n: usize, reps: usize) -> f32 {
     let mut input: Vec<Complex<f64>> = vec![Complex::zero(); n];
     input[0] = Complex::from(1.0);
     let mut output: Vec<Complex<f64>> = vec![Complex::zero(); n];
@@ -21,7 +21,7 @@ fn measure_bluestein(n: usize) -> f32 {
         inner_fft_inv,
         false,
     )) as Arc<FFT<f64>>;
-    let reps = 1000000 / n + 1;
+    let reps = reps / n + 1;
     for _r in 0..reps / 4 {
         fft.process(&mut input, &mut output);
     }
@@ -33,7 +33,7 @@ fn measure_bluestein(n: usize) -> f32 {
     duration.as_micros() as f32 / reps as f32
 }
 
-fn measure_rader(n: usize) -> f32 {
+fn measure_rader(n: usize, reps: usize) -> f32 {
     let mut input: Vec<Complex<f64>> = vec![Complex::zero(); n];
     input[0] = Complex::from(1.0);
     let mut output: Vec<Complex<f64>> = vec![Complex::zero(); n];
@@ -42,7 +42,25 @@ fn measure_rader(n: usize) -> f32 {
     let inner_fft = planner.plan_fft(inner_fft_len);
     let fft = Arc::new(rustfft::algorithm::RadersAlgorithm::new(n, inner_fft)) as Arc<FFT<f64>>;
 
-    let reps = 1000000 / n + 1;
+    let reps = reps / n + 1;
+    for _r in 0..reps / 4 {
+        fft.process(&mut input, &mut output);
+    }
+    let start = Instant::now();
+    for _r in 0..reps {
+        fft.process(&mut input, &mut output);
+    }
+    let duration = start.elapsed();
+    duration.as_micros() as f32 / reps as f32
+}
+
+fn measure_auto(n: usize, reps: usize) -> f32 {
+    let mut input: Vec<Complex<f64>> = vec![Complex::zero(); n];
+    input[0] = Complex::from(1.0);
+    let mut output: Vec<Complex<f64>> = vec![Complex::zero(); n];
+    let mut planner = FFTplanner::new(false);
+    let fft = planner.plan_fft(n);
+    let reps = reps / n + 1;
     for _r in 0..reps / 4 {
         fft.process(&mut input, &mut output);
     }
@@ -55,7 +73,7 @@ fn measure_rader(n: usize) -> f32 {
 }
 
 fn main() {
-    println!("N, Raders, Bluesteins");
+    println!("N, Raders, Bluesteins, auto");
     let vals = vec![
         3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
         97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181,
@@ -68,8 +86,9 @@ fn main() {
         877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997,
     ];
     for n in vals.iter() {
-        let t_rader = measure_rader(*n);
-        let t_bluestein = measure_bluestein(*n);
-        println!("{}, {}, {}", n, t_rader, t_bluestein);
+        let t_rader = measure_rader(*n, 1000000);
+        let t_bluestein = measure_bluestein(*n, 1000000);
+        let t_auto = measure_auto(*n, 1000000);
+        println!("{}, {}, {}, {}", n, t_rader, t_bluestein, t_auto);
     }
 }
